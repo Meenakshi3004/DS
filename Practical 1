@@ -1,80 +1,110 @@
 Practical No.1 RMI 
  
-AddInterface.java 
- 
-import java.rmi.*; 
- 
-public interface AddInterface extends Remote { 
-    // The method we want to call remotely 
-    public int add(int x, int y) throws RemoteException; 
-} 
- 
-AddImplementation.java 
- 
- 
-import java.rmi.*; 
-import java.rmi.server.*; 
- 
-public class AddImplementation extends UnicastRemoteObject implements AddInterface { 
-    public AddImplementation() throws RemoteException { 
-        super(); 
-    } 
- 
-    @Override 
-    public int add(int x, int y) { 
-        return (x + y); 
-    } 
-} 
- 
-Server.java 
- 
- 
-import java.rmi.*; 
-import java.rmi.registry.*; 
- 
-public class Server { 
-    public static void main(String[] args) { 
-        try { 
-            AddInterface obj = new AddImplementation(); 
-            // Bind the remote object in the registry 
-            Naming.rebind("AddService", obj); 
-            System.out.println("Server is ready."); 
-        } catch (Exception e) { 
-            System.out.println("Server failed: " + e); 
-        } 
-    } 
-} 
- 
-Client.java 
- 
-import java.rmi.*; 
- 
-public class Client { 
-    public static void main(String[] args) { 
-        try { 
-            // Locate the remote object 
-            AddInterface obj = (AddInterface) Naming.lookup("rmi://localhost/AddService"); 
-             
-            int result = obj.add(10, 20); 
-            System.out.println("Addition Result: " + result); 
-        } catch (Exception e) { 
-            System.out.println("Client Error: " + e); 
-        } 
-    } 
-} 
- 
-Commands:
-Compiler 1:
-javac Server.java
-javac Client.java
-javac AddInterface.java
-javac AddImplementation.java
-rmiregistry
+ServerIntf.java
 
-Compiler 2:
-java Server
+import java.rmi.*;
+interface ServerIntf extends Remote {
+    public double Addition(double num1, double num2) throws RemoteException;
+    public double Subtraction(double num1, double num2) throws RemoteException;
+    public double Multiplication(double num1, double num2) throws RemoteException;  
+    public double Division(double num1, double num2) throws RemoteException;
+}
 
-Compiler 3:
-java Client
+ServerImpl.java
 
- 
+import java.rmi.*;
+import java.rmi.server.*;
+
+public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
+
+    public ServerImpl() throws RemoteException {
+        super();
+    }
+    
+    public double Addition(double num1, double num2) throws RemoteException {
+        return num1 + num2;
+    }
+    
+    public double Subtraction(double num1, double num2) throws RemoteException {
+        return num1 - num2;
+    }
+    
+    public double Multiplication(double num1, double num2) throws RemoteException {
+        return num1 * num2;
+    }
+    
+    public double Division(double num1, double num2) throws RemoteException {
+        if (num2 != 0) {
+            return num1 / num2;
+        }
+        else{
+            system.out.println("Error: Division by zero is not allowed.");
+        }
+
+        return num1/num2;
+    }
+}
+
+
+Server.java
+
+import java.rmi.*;
+
+public class Server {
+    public static void main(String[] args) {
+        try {
+            ServerImpl serverImpl = new ServerImpl();
+            Naming.rebind("Server", serverImpl);
+            System.out.println("Server is ready.");
+        } catch (Exception e) {
+            System.out.println("Server exception: " + e.getMessage());
+            
+        }
+    }
+}
+
+client.java
+
+import java.rmi.*;
+import java.util.Scanner;
+
+public class Client {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        try {
+            String serverURL = "rmi://localhost/Server";
+            ServerIntf serverIntf = (ServerIntf) Naming.lookup(serverURL);
+
+            system.out.println("Enter first number: ");
+            double num1 = sc.nextDouble();
+
+            system.out.println("Enter second number: ");
+            double num2 = sc.nextDouble();
+
+            system.out.println("First number: " + num1);
+            system.out.println("Second number: " + num2);
+
+            system.out.println("Addition: " + serverIntf.Addition(num1, num2));
+            system.out.println("Subtraction: " + serverIntf.Subtraction(num1, num2));
+            system.out.println("Multiplication: " + serverIntf.Multiplication(num1, num2));
+            system.out.println("Division: " + serverIntf.Division(num1, num2));
+
+        } catch (Exception e) {
+            System.out.println("Client exception: " + e.getMessage());
+        }
+            
+}
+}
+
+output :
+complier 1 
+1 javac *.java
+2. rmiregistry 
+
+compiler 2
+java server
+
+compiler 3
+java client
+40 
+10
